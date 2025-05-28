@@ -8,9 +8,7 @@
 #define ADMIN_FILE "admins.txt"
 
 // --- Function Prototypes ---
-void mainSystemMenu(int *loggedInStatus, int *keepRunningApp); // Modified
-void otherManagementSystemsMenu();                             // Kept for structure, can be removed if not grouping 3,4,5 anymore
-                                                               // For this request, we will list them directly in mainSystemMenu
+void mainSystemMenu(int *loggedInStatus, int *keepRunningApp);
 
 void productManagementMenu();
 void addProduct();
@@ -21,8 +19,8 @@ void viewAllProducts();
 
 void inventoryManagementMenu();
 void stockManagementMenu();
-void categoryManagementMenu(); // New
-void supplierManagementMenu(); // New
+void categoryManagementMenu();
+void supplierManagementMenu();
 void userTransactionManagementMenu();
 
 int handleLogin();
@@ -33,6 +31,7 @@ float getFloatInput(const char *prompt);
 int getIntInput(const char *prompt);
 int productExists(const char *productID);
 void clearInputBuffer();
+void generateNewProductID(char *newIDBuffer, int bufferSize);
 
 int main()
 {
@@ -40,29 +39,23 @@ int main()
     checkFileExist(PRODUCT_FILE);
 
     int loggedIn = 0;
-    int keepRunningApp = 1; // Flag to control the main application loop
+    int keepRunningApp = 1;
 
     do
     {
         if (!loggedIn)
-        { // If not currently logged in (e.g., first run or after logout without exit)
+        {
             loggedIn = handleLogin();
             if (!loggedIn)
-            {                       // Login failed after max attempts
-                keepRunningApp = 0; // Signal to exit the application
-                                    // handleLogin already prints "Maximum login attempts reached."
+            {
+                keepRunningApp = 0;
             }
         }
 
         if (loggedIn && keepRunningApp)
-        {                                               // Only show main menu if logged in and app is still running
-            mainSystemMenu(&loggedIn, &keepRunningApp); // Pass loggedIn to be reset on logout
-                                                        // Pass keepRunningApp to be set if user wants to exit
+        {
+            mainSystemMenu(&loggedIn, &keepRunningApp);
         }
-        // If user logged out from mainSystemMenu but didn't exit (keepRunningApp is 1, loggedIn is 0),
-        // the loop will continue, and !loggedIn will be true, prompting login again.
-        // If user chose to exit from mainSystemMenu (keepRunningApp is 0), the loop terminates.
-        // If login failed definitively (keepRunningApp is 0), the loop terminates.
 
     } while (keepRunningApp);
 
@@ -80,10 +73,10 @@ void mainSystemMenu(int *loggedInStatus, int *keepRunningApp)
         printf("1. Product Management\n");
         printf("2. Inventory Management\n");
         printf("3. Stock Management\n");
-        printf("4. Category Management\n");             // Changed
-        printf("5. Supplier Management\n");             // New
-        printf("6. User and Transaction Management\n"); // Renumbered
-        printf("0. Logout\n");                          // Changed
+        printf("4. Category Management\n");
+        printf("5. Supplier Management\n");
+        printf("6. User and Transaction Management\n");
+        printf("0. Logout\n");
         printf("--------------------------\n");
         printf("Enter your choice: ");
 
@@ -101,32 +94,29 @@ void mainSystemMenu(int *loggedInStatus, int *keepRunningApp)
             stockManagementMenu();
             break;
         case 4:
-            categoryManagementMenu(); // New call
+            categoryManagementMenu();
             break;
         case 5:
-            supplierManagementMenu(); // New call
+            supplierManagementMenu();
             break;
         case 6:
-            userTransactionManagementMenu(); // Renumbered call
+            userTransactionManagementMenu();
             break;
         case 0: // Logout
             printf("Logging out...\n");
-            *loggedInStatus = 0; // Set loggedIn to 0 immediately
+            *loggedInStatus = 0;
 
             char exitChoiceBuffer[10];
             getStringInput("Do you want to exit the system completely? (y/n): ", exitChoiceBuffer, sizeof(exitChoiceBuffer));
             if (exitChoiceBuffer[0] == 'y' || exitChoiceBuffer[0] == 'Y')
             {
-                *keepRunningApp = 0; // Signal main loop to terminate
+                *keepRunningApp = 0;
             }
-            // If 'n' or anything else, keepRunningApp remains 1.
-            // The mainSystemMenu loop will terminate because choice is 0.
-            // The main() loop will then see loggedInStatus is 0 and keepRunningApp is 1, prompting login.
             break;
         default:
             printf("Invalid choice. Please try again.\n");
         }
-    } while (choice != 0 && *keepRunningApp); // Also exit menu if app is shutting down
+    } while (choice != 0 && *keepRunningApp);
 }
 
 // --- Product Management Menu Function ---
@@ -192,7 +182,7 @@ void stockManagementMenu()
     getchar();
 }
 
-void categoryManagementMenu() // New Placeholder
+void categoryManagementMenu()
 {
     printf("\n--- Category Management Menu ---\n");
     printf("This module is not yet implemented.\n");
@@ -201,7 +191,7 @@ void categoryManagementMenu() // New Placeholder
     getchar();
 }
 
-void supplierManagementMenu() // New Placeholder
+void supplierManagementMenu()
 {
     printf("\n--- Supplier Management Menu ---\n");
     printf("This module is not yet implemented.\n");
@@ -279,7 +269,6 @@ int handleLogin()
             printf("Attempts remaining: %d\n", MAX_LOGIN_ATTEMPTS - loginAttempts);
             if (loginAttempts >= MAX_LOGIN_ATTEMPTS)
             {
-                // The main loop will print the "Exiting system" message if login fails definitively
                 return 0;
             }
             continue;
@@ -331,16 +320,14 @@ int handleLogin()
             printf("Attempts remaining: %d\n", MAX_LOGIN_ATTEMPTS - loginAttempts);
             if (loginAttempts >= MAX_LOGIN_ATTEMPTS)
             {
+                printf("Maximum login attempts reached.\n");
                 return 0;
             }
         }
     }
-    // This part should ideally not be reached if MAX_LOGIN_ATTEMPTS >= 1
-    // because the loop condition or returns inside should handle termination.
-    // However, to be safe and ensure a return path:
     if (loginAttempts >= MAX_LOGIN_ATTEMPTS)
     {
-        printf("Maximum login attempts reached.\n"); // This message will be followed by main's exit message
+        printf("Maximum login attempts reached.\n");
     }
     return 0;
 }
@@ -419,7 +406,7 @@ int getIntInput(const char *prompt)
             }
             validInput = 0;
             if (strlen(prompt) == 0)
-                return -999; // Indicate invalid menu input
+                return -999;
             continue;
         }
         value_long = strtol(buffer, &endptr, 10);
@@ -432,7 +419,7 @@ int getIntInput(const char *prompt)
             }
             else
             {
-                return -999; // A distinct invalid menu choice
+                return -999;
             }
             validInput = 0;
         }
@@ -449,6 +436,35 @@ int getIntInput(const char *prompt)
     return value_int;
 }
 
+// Function to trim leading and trailing whitespace from a string
+void trimWhitespace(char *str)
+{
+    if (str == NULL)
+        return;
+    char *start = str;
+    char *end = str + strlen(str) - 1;
+
+    // Trim leading space
+    while (isspace((unsigned char)*start))
+    {
+        start++;
+    }
+
+    // Trim trailing space
+    while (end > start && isspace((unsigned char)*end))
+    {
+        end--;
+    }
+    // Write new null terminator
+    *(end + 1) = '\0';
+
+    // Shift string to the left if leading spaces were trimmed
+    if (start != str)
+    {
+        memmove(str, start, strlen(start) + 1);
+    }
+}
+
 int productExists(const char *productID_to_check)
 {
     FILE *file = fopen(PRODUCT_FILE, "r");
@@ -456,21 +472,87 @@ int productExists(const char *productID_to_check)
     {
         return 0;
     }
-    Inventory tempProduct;
     char line_buffer[512];
+    char id_from_file[MAX_ID_LENGTH];
+
     while (fgets(line_buffer, sizeof(line_buffer), file) != NULL)
     {
         line_buffer[strcspn(line_buffer, "\n")] = '\0';
-        tempProduct.productID[0] = '\0';
-        sscanf(line_buffer, "%[^,]", tempProduct.productID);
-        if (tempProduct.productID[0] != '\0' && strcmp(tempProduct.productID, productID_to_check) == 0)
+        id_from_file[0] = '\0';
+
+        if (sscanf(line_buffer, "%[^,]", id_from_file) == 1)
         {
-            fclose(file);
-            return 1;
+            trimWhitespace(id_from_file);
+            if (strcmp(id_from_file, productID_to_check) == 0)
+            {
+                fclose(file);
+                return 1;
+            }
         }
     }
     fclose(file);
     return 0;
+}
+
+void generateNewProductID(char *newIDBuffer, int bufferSize)
+{
+    FILE *file = fopen(PRODUCT_FILE, "r");
+    char currentLine[1024];
+    int maxNumericID = 0;
+
+    if (file != NULL)
+    {
+        char tempID_from_file[MAX_ID_LENGTH];
+        while (fgets(currentLine, sizeof(currentLine), file) != NULL)
+        {
+            tempID_from_file[0] = '\0';
+            if (sscanf(currentLine, "%[^,]", tempID_from_file) == 1)
+            {
+                trimWhitespace(tempID_from_file);
+
+                if (tempID_from_file[0] == 'P')
+                {
+                    int all_digits_after_P = 1;
+                    if (tempID_from_file[1] == '\0')
+                    {
+                        all_digits_after_P = 0;
+                    }
+                    else
+                    {
+                        for (int k = 1; tempID_from_file[k] != '\0'; ++k)
+                        {
+                            if (!isdigit((unsigned char)tempID_from_file[k]))
+                            {
+                                all_digits_after_P = 0;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (all_digits_after_P && tempID_from_file[1] != '\0')
+                    {
+                        int numericPart = atoi(tempID_from_file + 1);
+                        if (numericPart > maxNumericID)
+                        {
+                            maxNumericID = numericPart;
+                        }
+                    }
+                }
+            }
+        }
+        fclose(file);
+    }
+
+    maxNumericID++;
+
+    snprintf(newIDBuffer, bufferSize, "P%03d", maxNumericID);
+
+    while (productExists(newIDBuffer))
+    {
+        maxNumericID++;
+        snprintf(newIDBuffer, bufferSize, "P%03d", maxNumericID);
+    }
+    printf("Auto-generated Product ID: %s\n", newIDBuffer);
 }
 
 // --- Product Management Function Implementations ---
@@ -478,32 +560,82 @@ void addProduct()
 {
     printf("\n--- Add New Product ---\n");
     Inventory newProduct;
+    char idChoice[10];
 
-    do
+    printf("Do you want to enter Product ID manually or auto-generate? (manual/auto): ");
+    getStringInput("", idChoice, sizeof(idChoice));
+
+    for (int i = 0; idChoice[i]; i++)
     {
-        getStringInput("Enter Product ID (e.g., P001): ", newProduct.productID, MAX_ID_LENGTH);
-        if (strlen(newProduct.productID) == 0)
+        idChoice[i] = tolower(idChoice[i]);
+    }
+
+    if (strcmp(idChoice, "auto") == 0)
+    {
+        generateNewProductID(newProduct.productID, MAX_ID_LENGTH);
+    }
+    else if (strcmp(idChoice, "manual") == 0)
+    {
+        do
         {
-            printf("Product ID cannot be empty. Please try again.\n");
-            newProduct.productID[0] = '\0';
-            continue;
-        }
-        if (productExists(newProduct.productID))
+            getStringInput("Enter Product ID (e.g., P001): ", newProduct.productID, MAX_ID_LENGTH);
+            if (strlen(newProduct.productID) == 0)
+            {
+                printf("Product ID cannot be empty. Please try again.\n");
+                newProduct.productID[0] = '\0';
+                continue;
+            }
+            trimWhitespace(newProduct.productID);
+            if (strlen(newProduct.productID) == 0)
+            {
+                printf("Product ID cannot be effectively empty after trimming. Please try again.\n");
+                continue;
+            }
+
+            if (productExists(newProduct.productID))
+            {
+                printf("Product ID '%s' already exists. Please use a different ID.\n", newProduct.productID);
+                newProduct.productID[0] = '\0';
+            }
+        } while (strlen(newProduct.productID) == 0);
+    }
+    else
+    {
+        printf("Invalid choice for ID input. Defaulting to manual ID entry.\n");
+        do
         {
-            printf("Product ID '%s' already exists. Please use a different ID.\n", newProduct.productID);
-            newProduct.productID[0] = '\0';
-        }
-    } while (strlen(newProduct.productID) == 0);
+            getStringInput("Enter Product ID (e.g., P001): ", newProduct.productID, MAX_ID_LENGTH);
+            if (strlen(newProduct.productID) == 0)
+            {
+                printf("Product ID cannot be empty. Please try again.\n");
+                newProduct.productID[0] = '\0';
+                continue;
+            }
+            trimWhitespace(newProduct.productID);
+            if (strlen(newProduct.productID) == 0)
+            {
+                printf("Product ID cannot be effectively empty after trimming. Please try again.\n");
+                continue;
+            }
+
+            if (productExists(newProduct.productID))
+            {
+                printf("Product ID '%s' already exists. Please use a different ID.\n", newProduct.productID);
+                newProduct.productID[0] = '\0';
+            }
+        } while (strlen(newProduct.productID) == 0);
+    }
 
     getStringInput("Enter Category ID (FK - e.g., C01): ", newProduct.categoryID, MAX_ID_LENGTH);
+    trimWhitespace(newProduct.categoryID);
     if (strlen(newProduct.categoryID) == 0)
     {
         printf("Category ID is empty. Using 'N/A' as default.\n");
         strcpy(newProduct.categoryID, "N/A");
     }
-    // Future enhancement: Validate if Category ID exists in a categories.txt file.
 
     getStringInput("Enter Product Name: ", newProduct.name, MAX_NAME_LENGTH);
+    trimWhitespace(newProduct.name);
     if (strlen(newProduct.name) == 0)
     {
         printf("Product Name is empty. Using 'Unknown Product' as default.\n");
@@ -519,6 +651,7 @@ void addProduct()
     }
 
     getStringInput("Enter Product Description: ", newProduct.description, MAX_DESCRIPTION_LENGTH);
+    trimWhitespace(newProduct.description);
     if (strlen(newProduct.description) == 0)
     {
         strcpy(newProduct.description, "No description available.");
@@ -537,6 +670,7 @@ void updateProduct()
     int choice;
 
     getStringInput("Enter Product ID of the product to update: ", productID_to_update, MAX_ID_LENGTH);
+    trimWhitespace(productID_to_update);
     if (strlen(productID_to_update) == 0)
     {
         printf("Product ID cannot be empty.\n");
@@ -564,16 +698,17 @@ void updateProduct()
     case 1:
         strcpy(attribute_name, "categoryID");
         getStringInput("Enter new Category ID (FK): ", newValue_str, MAX_ID_LENGTH);
+        trimWhitespace(newValue_str);
         if (strlen(newValue_str) == 0)
         {
             printf("Category ID cannot be empty for update. Update cancelled.\n");
             return;
         }
-        // Future enhancement: Validate if new Category ID exists.
         break;
     case 2:
         strcpy(attribute_name, "name");
         getStringInput("Enter new Product Name: ", newValue_str, MAX_NAME_LENGTH);
+        trimWhitespace(newValue_str);
         if (strlen(newValue_str) == 0)
         {
             printf("Product Name cannot be empty for update. Update cancelled.\n");
@@ -602,6 +737,7 @@ void updateProduct()
     case 5:
         strcpy(attribute_name, "description");
         getStringInput("Enter new Description: ", newValue_str, MAX_DESCRIPTION_LENGTH);
+        trimWhitespace(newValue_str);
         break;
     case 0:
         printf("Update cancelled.\n");
@@ -610,6 +746,7 @@ void updateProduct()
         printf("Invalid choice for attribute. Update cancelled.\n");
         return;
     }
+    // Corrected the call to updateDataInventory
     updateDataInventory(PRODUCT_FILE, attribute_name, productID_to_update, newValue_str);
 }
 
@@ -620,6 +757,7 @@ void deleteProduct()
     char confirmation_buffer[10];
 
     getStringInput("Enter Product ID of the product to delete: ", productID_to_delete, MAX_ID_LENGTH);
+    trimWhitespace(productID_to_delete);
     if (strlen(productID_to_delete) == 0)
     {
         printf("Product ID cannot be empty.\n");
@@ -652,6 +790,7 @@ void viewSpecificProductDetails()
     int found = 0;
 
     getStringInput("Enter Product ID to view: ", productID_to_view, MAX_ID_LENGTH);
+    trimWhitespace(productID_to_view);
     if (strlen(productID_to_view) == 0)
     {
         printf("Product ID cannot be empty.\n");
@@ -675,19 +814,24 @@ void viewSpecificProductDetails()
         product.price = 0.0f;
         product.quantity = 0;
 
+        char file_productID[MAX_ID_LENGTH] = "";
         int itemsScanned = sscanf(line_buffer, "%[^,],%[^,],%[^,],%f,%d,%[^\n]",
-                                  product.productID, product.categoryID, product.name,
+                                  file_productID, product.categoryID, product.name,
                                   &product.price, &product.quantity, product.description);
 
-        if (product.productID[0] != '\0' && strcmp(product.productID, productID_to_view) == 0)
+        trimWhitespace(file_productID);
+
+        if (file_productID[0] != '\0' && strcmp(file_productID, productID_to_view) == 0)
         {
             found = 1;
+            strcpy(product.productID, file_productID);
+
             printf("\n--- Product Details for ID: %s (PK) ---\n", product.productID);
             printf("Category ID : %s (FK)\n", product.categoryID[0] == '\0' ? "N/A" : product.categoryID);
             printf("Name        : %s\n", product.name[0] == '\0' ? "N/A" : product.name);
             printf("Price       : %.2f\n", product.price);
             printf("Quantity    : %d\n", product.quantity);
-            printf("Description : %s\n", (itemsScanned < 6 || product.description[0] == '\0') ? "(empty)" : product.description);
+            printf("Description : %s\n", (strlen(product.description) == 0) ? "(empty)" : product.description);
             printf("-----------------------------------\n");
             break;
         }
@@ -727,9 +871,13 @@ void viewAllProducts()
         product.price = 0.0f;
         product.quantity = 0;
 
+        char file_productID[MAX_ID_LENGTH] = "";
         int itemsScanned = sscanf(line_buffer, "%[^,],%[^,],%[^,],%f,%d,%[^\n]",
-                                  product.productID, product.categoryID, product.name,
+                                  file_productID, product.categoryID, product.name,
                                   &product.price, &product.quantity, product.description);
+
+        trimWhitespace(file_productID);
+        strcpy(product.productID, file_productID);
 
         if (itemsScanned >= 5 && product.productID[0] != '\0')
         {
@@ -739,13 +887,11 @@ void viewAllProducts()
                    product.name[0] == '\0' ? "N/A" : product.name,
                    product.price,
                    product.quantity,
-                   (itemsScanned < 6 || product.description[0] == '\0') ? "(empty)" : product.description);
+                   (strlen(product.description) == 0) ? "(empty)" : product.description);
             count++;
         }
         else if (strlen(line_buffer) > 0 && line_buffer[0] != '\n' && line_buffer[0] != EOF && itemsScanned < 5)
         {
-            // This condition helps to identify lines that are not empty but failed to parse enough fields.
-            // It's optional to print this, as it might indicate data corruption or an empty line with just spaces.
             // printf("Skipping malformed or incomplete line in product file: %s\n", line_buffer);
         }
     }
