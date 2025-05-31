@@ -1,1 +1,1 @@
-P001,C01,Chair,99.99,100,Wood Chair
+P001,CT01,Chair,99.99,100,Wood Chair
