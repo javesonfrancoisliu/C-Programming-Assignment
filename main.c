@@ -626,7 +626,7 @@ void addProduct()
         } while (strlen(newProduct.productID) == 0);
     }
 
-    getStringInput("Enter Category ID (FK - e.g., C01): ", newProduct.categoryID, MAX_ID_LENGTH);
+    getStringInput("Enter Category ID (FK - e.g., CT01): ", newProduct.categoryID, MAX_ID_LENGTH);
     trimWhitespace(newProduct.categoryID);
     if (strlen(newProduct.categoryID) == 0)
     {
