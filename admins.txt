@@ -1,1 +1,0 @@
-A001,Main Admin,123 Admin Street,admin@store.com,0123456789,securepass123
