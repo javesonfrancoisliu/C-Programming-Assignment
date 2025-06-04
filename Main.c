@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "FileHandling.h"
-#include "FormatHandling.h" // Included new header
+#include "FormatHandling.h"
 
 #define PRODUCT_FILE "Inventory.txt"
 #define ADMIN_FILE "Admins.txt"
@@ -82,30 +82,21 @@ int getIntegerValidatedFH(const char *prompt)
             continue;
         }
 
-        value = intChecker(buffer); // Call from FormatHandling.h
+        value = intChecker(buffer);
 
-        // intChecker returns 0 if:
-        // 1. buffer is NULL or empty (handled by strlen check above)
-        // 2. buffer contains non-digit characters
-        // 3. buffer is "0" (atoi("0") is 0)
-        // We need to distinguish an invalid format from a valid input of "0".
         if (value == 0 && strcmp(buffer, "0") != 0)
         {
-            // If intChecker returned 0, but the input wasn't "0", it's an invalid format.
             printf("Invalid integer. Please use digits only.\n");
-            // Loop continues to re-prompt
         }
         else
         {
-            // Input is either a valid non-zero integer, or it was "0" and intChecker correctly returned 0.
-            // Add non-negative check if required by application logic (intChecker itself only allows digits)
             if (value < 0 && intChecker(buffer + 1) != 0)
-            { // Check if it was a negative number by mistake, intChecker doesn't support sign
+            {
                 printf("Negative numbers are not allowed for this input. Please enter a non-negative integer.\n");
             }
             else
             {
-                return value; // Valid input
+                return value;
             }
         }
     }
@@ -125,28 +116,18 @@ float getFloatValidatedFH(const char *prompt)
             continue;
         }
 
-        value = floatChecker(buffer); // Call from FormatHandling.h
+        value = floatChecker(buffer);
 
-        // floatChecker returns 0.0f if:
-        // 1. buffer is NULL or empty (handled by strlen check above)
-        // 2. buffer has invalid float format (e.g., multiple dots, no digits, non-digit/non-dot chars)
-        // 3. buffer represents 0.0 (e.g., "0", "0.0", ".0")
-        // We need to distinguish an invalid format from a valid input of 0.0.
         int is_actually_zero = (strcmp(buffer, "0") == 0 || strcmp(buffer, "0.0") == 0 ||
                                 strcmp(buffer, ".0") == 0 || strcmp(buffer, "0.") == 0);
 
         if (value == 0.0f && !is_actually_zero)
         {
-            // If floatChecker returned 0.0, but the input wasn't a valid representation of zero,
-            // it's an invalid format.
             printf("Invalid float. Please use digits and at most one decimal point.\n");
-            // Loop continues
         }
         else
         {
-            // Input is either a valid non-zero float, or a valid representation of 0.0.
-            // floatChecker from FormatHandling.h implies non-negative by its digit/dot checking.
-            return value; // Valid input
+            return value;
         }
     }
 }
@@ -166,17 +147,15 @@ int getMenuChoiceValidatedFH(const char *prompt)
             continue;
         }
 
-        value = intChecker(buffer); // Use intChecker from FormatHandling.h
+        value = intChecker(buffer);
 
-        // Check if intChecker returned 0 for an invalid string vs. input "0"
         if (value == 0 && strcmp(buffer, "0") != 0)
         {
             printf("Invalid choice. Please enter a number.\n");
-            // Loop continues
         }
         else
         {
-            return value; // Valid menu choice (0, 1, 2, ...)
+            return value;
         }
     }
 }
@@ -228,7 +207,7 @@ void mainSystemMenu(int *loggedInStatus, int *keepRunningApp)
             getStringInput("Do you want to exit the system completely? (y/n): ", exitChoiceBuffer, sizeof(exitChoiceBuffer));
             trimWhitespace(exitChoiceBuffer);
             for (int i = 0; exitChoiceBuffer[i]; i++)
-            { // Convert to lowercase for comparison
+            {
                 exitChoiceBuffer[i] = tolower(exitChoiceBuffer[i]);
             }
             if (strcmp(exitChoiceBuffer, "y") == 0 || strcmp(exitChoiceBuffer, "yes") == 0)
@@ -951,7 +930,7 @@ void viewAllProducts()
         }
         else if (strlen(line_buffer) > 0 && line_buffer[0] != '\n' && line_buffer[0] != EOF && itemsScanned < 5)
         {
-            // Optional: printf("Skipping malformed or incomplete line in product file: %s\n", line_buffer);
+            printf("Skipping malformed or incomplete line in product file: %s\n", line_buffer);
         }
     }
 
