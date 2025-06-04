@@ -78,100 +78,34 @@ int getIntegerValidatedFH(const char *prompt)
         trimWhitespace(buffer);
         if (buffer[0] == '\0')
         {
-            if (strlen(prompt) > 0)
-            {
-                printf("Input cannot be empty. Please try again.\n");
-            }
-            else
-            {
-                // For menu choices with empty prompt, an empty input is just invalid.
-                // Let the loop in menu function with default case handle "Invalid choice".
-                // However, returning a specific error value might be cleaner for menus.
-                // For now, let menu choice validation be slightly different if needed or rely on this.
-                printf("Invalid input. Please enter a number.\n");
-            }
+            printf("Input cannot be empty. Please try again.\n");
             continue;
         }
 
-        int is_numeric_string = 1;
-        if (buffer[0] == '-' && buffer[1] != '\0')
-        { // Allow negative if it's not just "-"
-            for (int i = 1; buffer[i] != '\0'; ++i)
-            { // Check digits after '-'
-                if (!isdigit((unsigned char)buffer[i]))
-                {
-                    is_numeric_string = 0;
-                    break;
-                }
-            }
-        }
-        else if (buffer[0] == '-' && buffer[1] == '\0')
-        { // Just "-" is invalid
-            is_numeric_string = 0;
-        }
-        else
-        { // Check all for digits if not starting with '-' or if it is '+'
-            char *p = buffer;
-            if (*p == '+')
-                p++; // Skip leading '+'
-            if (*p == '\0' && *(p - 1) == '+')
-                is_numeric_string = 0; // Just "+" is invalid
+        value = intChecker(buffer); // Call from FormatHandling.h
 
-            while (*p != '\0')
-            {
-                if (!isdigit((unsigned char)*p))
-                {
-                    is_numeric_string = 0;
-                    break;
-                }
-                p++;
-            }
-        }
-
-        if (is_numeric_string)
+        // intChecker returns 0 if:
+        // 1. buffer is NULL or empty (handled by strlen check above)
+        // 2. buffer contains non-digit characters
+        // 3. buffer is "0" (atoi("0") is 0)
+        // We need to distinguish an invalid format from a valid input of "0".
+        if (value == 0 && strcmp(buffer, "0") != 0)
         {
-            // Note: FormatHandling.h's intChecker only supports positive integers based on its code (checks isdigit for all chars)
-            // If you need to support negative integers, intChecker itself would need modification,
-            // or you'd have to handle the sign separately before passing to a modified intChecker.
-            // For now, assuming intChecker is used for positive integers or '0' as per its definition.
-            // The pre-validation ensures only strings of digits are passed to intChecker.
-            // If intChecker strictly only takes positive, then "0" might be an issue if it returns 0 for that too.
-            // Let's use strtol for robust conversion after our pre-validation.
-            char *endptr;
-            long long_val = strtol(buffer, &endptr, 10);
-            if (*endptr == '\0' && strlen(buffer) > 0)
-            { // Conversion successful, entire string consumed
-                if (long_val < -2147483648L || long_val > 2147483647L)
-                { // Check int range
-                    printf("Input out of integer range. Please enter a valid integer.\n");
-                }
-                else
-                {
-                    value = (int)long_val;
-                    // If FormatHandling.h intChecker is preferred despite its limitations:
-                    // value = intChecker(buffer);
-                    // if (value == 0 && strcmp(buffer, "0") != 0) {
-                    //     // This condition means intChecker failed for a non-"0" string
-                    //     printf("Invalid integer format according to intChecker. Please use digits only.\n");
-                    //     continue;
-                    // }
-                    return value;
-                }
-            }
-            else
-            {
-                printf("Invalid integer format. Please use digits only.\n");
-            }
+            // If intChecker returned 0, but the input wasn't "0", it's an invalid format.
+            printf("Invalid integer. Please use digits only.\n");
+            // Loop continues to re-prompt
         }
         else
         {
-            if (strlen(prompt) > 0)
-            {
-                printf("Invalid integer. Please use digits only.\n");
+            // Input is either a valid non-zero integer, or it was "0" and intChecker correctly returned 0.
+            // Add non-negative check if required by application logic (intChecker itself only allows digits)
+            if (value < 0 && intChecker(buffer + 1) != 0)
+            { // Check if it was a negative number by mistake, intChecker doesn't support sign
+                printf("Negative numbers are not allowed for this input. Please enter a non-negative integer.\n");
             }
             else
-            { // For menu, usually handled by default case
-                printf("Invalid choice. Please enter a number.\n");
+            {
+                return value; // Valid input
             }
         }
     }
@@ -191,72 +125,40 @@ float getFloatValidatedFH(const char *prompt)
             continue;
         }
 
-        // Use strtod for robust float conversion after basic check for FormatHandling.h compatibility
-        char *endptr;
-        value = strtod(buffer, &endptr);
+        value = floatChecker(buffer); // Call from FormatHandling.h
 
-        if (*endptr == '\0' && strlen(buffer) > 0)
-        { // Conversion successful, entire string was number-like
-            // Now, check if it adheres to FormatHandling.h's floatChecker rules (digits, at most one dot)
-            // This is mostly for conceptual alignment, as strtod is more permissive.
-            // FormatHandling.h's floatChecker implies non-negative due to isdigit check.
-            int isValidForFHChecker = 1;
-            int dotCount = 0;
-            int digitCount = 0;
-            char *p = buffer;
-            if (*p == '+' || *p == '-')
-                p++; // strtod handles sign, floatChecker doesn't
-            if (*p == '\0' && (*(p - 1) == '+' || *(p - 1) == '-'))
-                isValidForFHChecker = 0; // only sign
+        // floatChecker returns 0.0f if:
+        // 1. buffer is NULL or empty (handled by strlen check above)
+        // 2. buffer has invalid float format (e.g., multiple dots, no digits, non-digit/non-dot chars)
+        // 3. buffer represents 0.0 (e.g., "0", "0.0", ".0")
+        // We need to distinguish an invalid format from a valid input of 0.0.
+        int is_actually_zero = (strcmp(buffer, "0") == 0 || strcmp(buffer, "0.0") == 0 ||
+                                strcmp(buffer, ".0") == 0 || strcmp(buffer, "0.") == 0);
 
-            while (*p != '\0')
-            {
-                if (isdigit((unsigned char)*p))
-                    digitCount++;
-                else if (*p == '.')
-                    dotCount++;
-                else
-                {
-                    isValidForFHChecker = 0;
-                    break;
-                }
-                p++;
-            }
-            if (dotCount > 1 || digitCount == 0)
-                isValidForFHChecker = 0;
-
-            if (isValidForFHChecker)
-            {
-                // Check non-negativity if implied by floatChecker (which it is)
-                if (value < 0)
-                {
-                    printf("Value cannot be negative (as per FormatHandling.h floatChecker rules). Please enter a non-negative number.\n");
-                    // continue loop
-                }
-                else
-                {
-                    return value;
-                }
-            }
-            else
-            {
-                printf("Invalid float format. Please use digits and at most one decimal point.\n");
-            }
+        if (value == 0.0f && !is_actually_zero)
+        {
+            // If floatChecker returned 0.0, but the input wasn't a valid representation of zero,
+            // it's an invalid format.
+            printf("Invalid float. Please use digits and at most one decimal point.\n");
+            // Loop continues
         }
         else
         {
-            printf("Invalid float format. Please try again.\n");
+            // Input is either a valid non-zero float, or a valid representation of 0.0.
+            // floatChecker from FormatHandling.h implies non-negative by its digit/dot checking.
+            return value; // Valid input
         }
     }
 }
 
+// Wrapper specifically for menu choices, using intChecker from FormatHandling.h
 int getMenuChoiceValidatedFH(const char *prompt)
-{ // Specifically for menu choices
+{
     char buffer[100];
     int value;
     while (1)
     {
-        getStringInput(prompt, buffer, sizeof(buffer)); // Prompt is "" for menu
+        getStringInput(prompt, buffer, sizeof(buffer));
         trimWhitespace(buffer);
         if (buffer[0] == '\0')
         {
@@ -264,47 +166,17 @@ int getMenuChoiceValidatedFH(const char *prompt)
             continue;
         }
 
-        int is_numeric_string = 1;
-        char *p = buffer;
-        if (*p == '-' && *(p + 1) != '\0')
-            p++; // Allow negative menu choices if ever needed, but usually not
-        else if (*p == '-' && *(p + 1) == '\0')
-            is_numeric_string = 0; // just "-"
+        value = intChecker(buffer); // Use intChecker from FormatHandling.h
 
-        while (*p != '\0')
+        // Check if intChecker returned 0 for an invalid string vs. input "0"
+        if (value == 0 && strcmp(buffer, "0") != 0)
         {
-            if (!isdigit((unsigned char)*p))
-            {
-                is_numeric_string = 0;
-                break;
-            }
-            p++;
-        }
-
-        if (is_numeric_string)
-        {
-            // Using strtol for robust conversion for menu choices as well
-            char *endptr_menu;
-            long long_val_menu = strtol(buffer, &endptr_menu, 10);
-            if (*endptr_menu == '\0')
-            { // Full conversion
-                if (long_val_menu < -2147483648L || long_val_menu > 2147483647L)
-                {
-                    printf("Choice out of integer range.\n");
-                }
-                else
-                {
-                    return (int)long_val_menu;
-                }
-            }
-            else
-            {
-                printf("Invalid choice format. Please enter a number.\n");
-            }
+            printf("Invalid choice. Please enter a number.\n");
+            // Loop continues
         }
         else
         {
-            printf("Invalid choice. Please enter a number.\n");
+            return value; // Valid menu choice (0, 1, 2, ...)
         }
     }
 }
@@ -355,7 +227,11 @@ void mainSystemMenu(int *loggedInStatus, int *keepRunningApp)
             char exitChoiceBuffer[10];
             getStringInput("Do you want to exit the system completely? (y/n): ", exitChoiceBuffer, sizeof(exitChoiceBuffer));
             trimWhitespace(exitChoiceBuffer);
-            if (exitChoiceBuffer[0] == 'y' || exitChoiceBuffer[0] == 'Y')
+            for (int i = 0; exitChoiceBuffer[i]; i++)
+            { // Convert to lowercase for comparison
+                exitChoiceBuffer[i] = tolower(exitChoiceBuffer[i]);
+            }
+            if (strcmp(exitChoiceBuffer, "y") == 0 || strcmp(exitChoiceBuffer, "yes") == 0)
             {
                 *keepRunningApp = 0;
             }
@@ -581,7 +457,7 @@ int handleLogin()
     return 0;
 }
 
-// --- Helper Function Implementations ---
+// --- Helper Function Implementations (getStringInput, clearInputBuffer, trimWhitespace are from before) ---
 void clearInputBuffer()
 {
     int c;
@@ -610,7 +486,6 @@ void getStringInput(const char *prompt, char *buffer, int buffer_size)
     }
 }
 
-// Function to trim leading and trailing whitespace from a string
 void trimWhitespace(char *str)
 {
     if (str == NULL || *str == '\0')
@@ -815,6 +690,17 @@ void addProduct()
     newProduct.price = getFloatValidatedFH("Enter Product Price: ");
     newProduct.quantity = getIntegerValidatedFH("Enter Product Quantity (non-negative): ");
 
+    if (newProduct.price < 0.0f)
+    {
+        printf("Price cannot be negative. Setting to 0.00.\n");
+        newProduct.price = 0.0f;
+    }
+    if (newProduct.quantity < 0)
+    {
+        printf("Quantity cannot be negative. Setting to 0.\n");
+        newProduct.quantity = 0;
+    }
+
     getStringInput("Enter Product Description: ", newProduct.description, MAX_DESCRIPTION_LENGTH);
     trimWhitespace(newProduct.description);
     if (strlen(newProduct.description) == 0)
@@ -884,6 +770,11 @@ void updateProduct()
     {
         strcpy(attribute_name, "price");
         float new_price = getFloatValidatedFH("Enter new Price: ");
+        if (new_price < 0.0f)
+        {
+            printf("Price cannot be negative. Using 0.00.\n");
+            new_price = 0.0f;
+        }
         sprintf(newValue_str, "%.2f", new_price);
         break;
     }
@@ -891,6 +782,11 @@ void updateProduct()
     {
         strcpy(attribute_name, "quantity");
         int new_quantity = getIntegerValidatedFH("Enter new Quantity (non-negative): ");
+        if (new_quantity < 0)
+        {
+            printf("Quantity cannot be negative. Using 0.\n");
+            new_quantity = 0;
+        }
         sprintf(newValue_str, "%d", new_quantity);
         break;
     }
@@ -931,7 +827,10 @@ void deleteProduct()
 
     getStringInput("Are you sure you want to delete product ID (y/n): ", confirmation_buffer, sizeof(confirmation_buffer));
     trimWhitespace(confirmation_buffer);
-    if (confirmation_buffer[0] == 'y' || confirmation_buffer[0] == 'Y')
+    for (int i = 0; confirmation_buffer[i]; ++i)
+        confirmation_buffer[i] = tolower(confirmation_buffer[i]);
+
+    if (strcmp(confirmation_buffer, "y") == 0 || strcmp(confirmation_buffer, "yes") == 0)
     {
         deleteDataInventory(PRODUCT_FILE, productID_to_delete);
     }
@@ -992,7 +891,7 @@ void viewSpecificProductDetails()
             printf("\n--- Product Details for ID: %s (PK) ---\n", product.productID);
             printf("Category ID : %s (FK)\n", product.categoryID[0] == '\0' ? "N/A" : product.categoryID);
             printf("Name        : %s\n", product.name[0] == '\0' ? "N/A" : product.name);
-            printf("Price       : RM %.2f\n", product.price); // Added RM
+            printf("Price       : RM %.2f\n", product.price);
             printf("Quantity    : %d\n", product.quantity);
             printf("Description : %s\n", (strlen(product.description) == 0) ? "(empty)" : product.description);
             printf("-----------------------------------\n");
@@ -1019,14 +918,10 @@ void viewAllProducts()
     int count = 0;
     char line_buffer[1024];
 
-    printf("+------------+---------------+--------------------------------+------------+----------+------------------------------------+\n");
-    printf("| Product ID | Category ID   | Name                           | Price      | Quantity | Description (first 34 chars)       |\n");
-    printf("| (PK)       | (FK)          |                                |            |          |                                    |\n");
-    printf("+------------+---------------+--------------------------------+------------+----------+------------------------------------+\n");
-
     while (fgets(line_buffer, sizeof(line_buffer), file) != NULL)
     {
         line_buffer[strcspn(line_buffer, "\n")] = '\0';
+
         product.productID[0] = '\0';
         product.categoryID[0] = '\0';
         product.name[0] = '\0';
@@ -1034,33 +929,36 @@ void viewAllProducts()
         product.price = 0.0f;
         product.quantity = 0;
 
-        char file_productID[MAX_ID_LENGTH] = "";
-
         int itemsScanned = sscanf(line_buffer, "%[^,],%[^,],%[^,],%f,%d,%[^\n]",
-                                  file_productID, product.categoryID, product.name,
+                                  product.productID, product.categoryID, product.name,
                                   &product.price, &product.quantity, product.description);
 
-        trimWhitespace(file_productID);
-        strcpy(product.productID, file_productID);
+        trimWhitespace(product.productID);
 
         if (itemsScanned >= 5 && product.productID[0] != '\0')
         {
-            // Adjusted format for RM, assuming price column can accommodate it
-            printf("| %-10.10s | %-13.13s | %-30.30s | RM %-7.2f | %-8d | %-34.34s |\n",
-                   product.productID,
-                   product.categoryID[0] == '\0' ? "N/A" : product.categoryID,
-                   product.name[0] == '\0' ? "N/A" : product.name,
-                   product.price,
-                   product.quantity,
-                   (strlen(product.description) == 0) ? "(empty)" : product.description);
+            if (count > 0)
+            {
+                printf("------------------------------------\n");
+            }
+            printf("Product ID  : %s (PK)\n", product.productID);
+            printf("Category ID : %s (FK)\n", product.categoryID[0] == '\0' ? "N/A" : product.categoryID);
+            printf("Name        : %s\n", product.name[0] == '\0' ? "N/A" : product.name);
+            printf("Price       : RM %.2f\n", product.price);
+            printf("Quantity    : %d\n", product.quantity);
+            printf("Description : %s\n", (itemsScanned < 6 || product.description[0] == '\0') ? "(empty)" : product.description);
             count++;
         }
         else if (strlen(line_buffer) > 0 && line_buffer[0] != '\n' && line_buffer[0] != EOF && itemsScanned < 5)
         {
-            // printf("Skipping malformed or incomplete line in product file: %s\n", line_buffer);
+            // Optional: printf("Skipping malformed or incomplete line in product file: %s\n", line_buffer);
         }
     }
-    printf("+------------+---------------+--------------------------------+------------+----------+------------------------------------+\n");
+
+    if (count > 0)
+    {
+        printf("------------------------------------\n");
+    }
     fclose(file);
     if (count == 0)
     {
@@ -1068,6 +966,6 @@ void viewAllProducts()
     }
     else
     {
-        printf("Total products listed: %d\n", count);
+        printf("\nTotal products listed: %d\n", count);
     }
 }
