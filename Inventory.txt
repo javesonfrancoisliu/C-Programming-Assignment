@@ -1,2 +1,0 @@
-P001,CT01,Chair,99.99,100,Wood Chair
-P002,CT01,Desk,199.99,100,Wood Desk
