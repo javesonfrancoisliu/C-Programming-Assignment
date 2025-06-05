@@ -1,0 +1,5 @@
+AD0001,Ahmad Faris,10 Jalan PJU 1A/3,ahmad.f@email.com,012-3456781,P@sswOrd1!
+AD0002,Chen Mei Ling,25 Lorong Setia 5,meiling.c@email.com,019-8765432,Ch3nMLSecure*
+AD0003,Suresh Ramachandran,Lot 301 Kampung Baru,suresh.r@email.com,017-5551234,R@m@ch@n22
+AD0004,Isabelle Lim,A-15-02 Kiara Residence,isabelle.l@email.com,016-9870001,LimIsabelle!@#
+AD0005,Zahid Hamidi,No 7 Jalan Mawar Indah,zahid.h@email.com,011-12345678,ZahidAdmin005

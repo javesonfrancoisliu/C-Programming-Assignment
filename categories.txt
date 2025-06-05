@@ -1,0 +1,5 @@
+CAT0001,Office Furniture,Chairs, desks, and storage for office use
+CAT0002,Living Room Furniture,Sofas, coffee tables, and TV consoles
+CAT0003,Bedroom Furniture,Beds, wardrobes, and dressing tables
+CAT0004,Kitchen & Dining,Dining sets, kitchen cabinets, and islands
+CAT0005,Outdoor Furniture,Garden sets, patio chairs, and outdoor storage

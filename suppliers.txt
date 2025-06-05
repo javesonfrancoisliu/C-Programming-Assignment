@@ -1,0 +1,5 @@
+SUP0001,Furniture World Mfg,Lot 123 Industrial Park, Shah Alam,sales@furnitureworld.my,03-51112233
+SUP0002,ComfortZone Seating,No. 45 Jalan Kilang, Rawang,orders@comfortzone.com,03-60901122
+SUP0003,WoodArtistry Creations,Kawasan Perindustrian Balakong, Seri Kembangan,info@woodartistry.net,03-89613344
+SUP0004,OfficePro Solutions,Suite 5, Wisma Central, Kuala Lumpur,contact@officepro.biz,03-21664455
+SUP0005,HomeStyle Imports,Port Klang Free Zone, Pelabuhan Klang,imports@homestyle.asia,03-31685566

@@ -1,0 +1,5 @@
+CUS0001,Brenda Tan,Unit 5 Block C Desa Parkcity,brenda.t@email.com,012-1112233
+CUS0002,Ravi Pillay,No. 18 Jalan Meranti Klang,ravi.p@email.com,019-3334455
+CUS0003,Fatimah Az-Zahra,Lot 45 Kampung Melayu Subang,fatimah.z@email.com,017-6667788
+CUS0004,Kevin O'Malley,B-2-2 Sri Kenny Condominium,kevin.om@email.com,016-8889900
+CUS0005,Noraini Yusof,77 Jalan Harmoni Shah Alam,noraini.y@email.com,011-2223344

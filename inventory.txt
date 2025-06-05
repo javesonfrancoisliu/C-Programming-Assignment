@@ -1,0 +1,6 @@
+PROD0001,CAT0001,Ergonomic Office Chair,399.90,75,Mesh back support, adjustable height
+PROD0002,CAT0001,Executive Work Desk,750.00,40,Large L-shaped desk with drawers
+PROD0003,CAT0002,Velvet Sofa 3-Seater,1299.00,25,Plush velvet sofa, dark grey
+PROD0004,CAT0003,Queen Size Bed Frame,899.50,30,Solid wood bed frame with headboard
+PROD0005,CAT0004,Marble Top Dining Table,1500.00,15,6-seater dining table with marble top
+PROD0006,CAT0003,TV Desk,99.99,10,Desk for put a TV with modern design

@@ -1,0 +1,5 @@
+LOG0001,Speedy Delivery Express,support@speedydel.com.my,03-55551000
+LOG0002,FastGo Couriers,cs@fastgo.com,03-77772000
+LOG0003,NationWide Logistics,help@nationwide.my,03-88883000
+LOG0004,FlyerNextDay Services,ops@flyernext.com,03-22224000
+LOG0005,SecureTrans Malaysia,info@securetrans.com.my,03-44445000
