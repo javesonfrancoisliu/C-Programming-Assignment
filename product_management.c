@@ -8,6 +8,7 @@
 // Include your new, updated header files provided by the lecturer
 #include "FileHandling.h"
 #include "FormatHandling.h"
+#include "product_management.h" // <<<--- ADD THIS LINE
 
 // Define filenames as constants for easy modification and consistency
 #define INVENTORY_FILE "inventory.txt"
@@ -27,8 +28,6 @@ int getValidIntegerInput(const char *prompt, int allowZero, int allowNegative);
 float getValidFloatInput(const char *prompt, int allowZero, int allowNegative);
 void printInventoryFields(const Inventory *product);
 void addNewProduct_local(const Inventory *newProduct); // Local function to fix broken add functionality
-
-// productManagementMenu is declared in main.c as it's called from there.
 
 // --- Helper Functions for Input Validation ---
 
